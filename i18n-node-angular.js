@@ -43,94 +43,92 @@
 			i18nProvider.objectNotation = delimiter;
 		};
 
+		i18nProvider.translations = {};
 		i18nProvider.setTranslations = function(translations) {
 			i18nProvider.translations = translations;
 		};
 
 		i18nProvider.mode = SYNC;
-		i18nProvider.setAsyncMode(function() {
+		i18nProvider.useAsyncMode = function() {
 			i18nProvider.mode = ASYNC;
-		});
-
-
-		/**
-		 * Factory for creating an appropriate init function for the service
-		 * based on the current mode.
-		 */
-		function InitiatorFactory() {};
-
-		InitiatorFactory.prototype.make = function makeI18nInitiator(mode) {
-
-			if (mode == ASYNC) {
-				return asyncInitiator;
-			}
-
-			return syncInitiator;
 		};
 
-		/**
-		 * Async initiator for i18n service
-		 * @param  {string} 		locale the current locale
-		 * @return {promise}        Promise to be resolved when translation map has been loaded.
-		 */
-		var asyncInitiator = function(locale) {
-
-			service._deferredStack.pop().reject(error);
-			if (locale != this.userLanguage) {
-				if (this._localeLoadedDeferred) {
-					this._deferredStack.push(this._localeLoadedDeferred);
-				}
-
-				this._localeLoadedDeferred = $q.defer();
-				this.loaded = false;
-				this.userLanguage = locale;
-
-				var service = this;
-
-				$http({
-					method: "get",
-					url: "/i18n/" + locale,
-					cache: true
-				}).success(function(translations) {
-					$rootScope.i18n = translations;
-					service.loaded = true;
-					service._localeLoadedDeferred.resolve($rootScope.i18n);
-
-					while (service._deferredStack.length) {
-						service._deferredStack.pop().resolve($rootScope.i18n);
-					}
-
-					$rootScope.$broadcast("LOCALE_UPDATED");
-				}).error(function(error) {
-					service._localeLoadedDeferred.reject(error);
-
-					while (service._deferredStack.length) {}
-				});
-			}
-
-
-			return this._localeLoadedDeferred.promise;
-		};
 		
-		/**
-		 * Initiator function for the i18nService in sync mode.
-		 * Resolved the _localeLoadedDeferred promise straight up as we don't have to wait for any loading.
-		 * 
-		 * @return function i18n
-		 */
-		var syncInitiator = function() {
-			$rootScope.i18n = i18nProvider.translations;
-			this.loaded = true;
-			return this._localeLoadedDeferred.resolve($rootScope.i18n);
-		};
-
-
-
 		/**
 		 * The main i18n service which handles retrieval of the translation map sends single translation terms to the backend.
 		 */
 		i18nProvider.$get = ["$rootScope", "$http", "$q", function($rootScope, $http, $q) {
 			var i18nService = function() {
+
+				/**
+				 * Async initiator for i18n service
+				 * @param  {string} 		locale the current locale
+				 * @return {promise}        Promise to be resolved when translation map has been loaded.
+				 */
+				var asyncInitiator = function(locale) {
+
+					if (locale != this.userLanguage) {
+						if (this._localeLoadedDeferred) {
+							this._deferredStack.push(this._localeLoadedDeferred);
+						}
+						this._localeLoadedDeferred = $q.defer();
+						this.loaded = false;
+						this.userLanguage = locale;
+
+						var service = this;
+
+						$http({
+							method: "get",
+							url: "/i18n/" + locale,
+							cache: true
+						}).success(function(translations) {
+							$rootScope.i18n = translations;
+							service.loaded = true;
+							service._localeLoadedDeferred.resolve($rootScope.i18n);
+
+							while (service._deferredStack.length) {
+								service._deferredStack.pop().resolve($rootScope.i18n);
+							}
+
+							$rootScope.$broadcast("LOCALE_UPDATED");
+						}).error(function(error) {
+							service._localeLoadedDeferred.reject(error);
+
+							while (service._deferredStack.length) {
+								service._deferredStack.pop().reject(error);
+							}
+						});
+					}
+
+					return this._localeLoadedDeferred.promise;
+				};
+
+				/**
+				 * Initiator function for the i18nService in sync mode.
+				 * Resolved the _localeLoadedDeferred promise straight up as we don't have to wait for any loading.
+				 * 
+				 * @return function i18n
+				 */
+				var syncInitiator = function() {
+					$rootScope.i18n = i18nProvider.translations;
+					this.loaded = true;
+					return this._localeLoadedDeferred.resolve($rootScope.i18n);
+				};
+
+				/**
+				 * Factory for creating an appropriate init function for the service
+				 * based on the current mode.
+				 */
+				function InitiatorFactory() {};
+
+				InitiatorFactory.prototype.make = function makeI18nInitiator(mode) {
+
+					if (mode == ASYNC) {
+						return asyncInitiator;
+					}
+
+					return syncInitiator;
+				};
 
 				// We use this deferred to keep track of if the last locale loading request has completed.
 				this._localeLoadedDeferred = $q.defer();
@@ -141,7 +139,7 @@
 				this.loaded = false;
 
 				var initFactory = new InitiatorFactory();
-				
+
 				// Initialize the service with the init function varying depending on the current mode, sync or async.
 				this.init = initFactory.make(i18nProvider.mode);
 
@@ -205,9 +203,9 @@
 						// The term is very unlikely to be actually translated now, as it was most
 						// likely previously unknown in the users locale, but, hey.
 						if (i18nProvider.mode == ASYNC) {
-							$http.get( "/i18n/" + this.userLanguage + "/" + encodeURIComponent( name ) ).success( function( translated ) {
-								$rootScope.i18n[ name ] = translated;
-							} );
+							$http.get("/i18n/" + this.userLanguage + "/" + encodeURIComponent(name)).success(function(translated) {
+								$rootScope.i18n[name] = translated;
+							});
 						}
 					}
 
@@ -257,15 +255,15 @@
 								"/i18n/" +
 								this.userLanguage +
 								"/" +
-								encodeURIComponent( singular ) +
+								encodeURIComponent(singular) +
 								"?plural=" +
-								encodeURIComponent( plural ) +
+								encodeURIComponent(plural) +
 								"&count=" +
-								encodeURIComponent( count );
+								encodeURIComponent(count);
 
-							$http.get( requestUri ).success( function( translated ) {
-								$rootScope.i18n[ singular ] = translated;
-							} );
+							$http.get(requestUri).success(function(translated) {
+								$rootScope.i18n[singular] = translated;
+							});
 						}
 					}
 
@@ -288,7 +286,7 @@
 		return {
 			restrict: "A",
 			link: function postLink(scope, element, attributes) {
-				
+
 				function updateText(literal, count) {
 					literal = literal || attributes["i18n"];
 					count = count || getCount();
