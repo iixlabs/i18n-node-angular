@@ -27,7 +27,7 @@
  */
 
 (function() {
-	"use strict";
+	// "use strict";
 
 	var i18nModule = angular.module("i18n", []);
 

@@ -8,7 +8,8 @@ module.exports = function( grunt ) {
 
 			uglify : {
 				options : {
-					banner : "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd HH:MM:ss') %> */\n"
+					banner : "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd HH:MM:ss') %> */\n",
+					mangle: false
 				},
 				i18n    : {
 					src  : "i18n-node-angular.js",
