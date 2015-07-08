@@ -53,7 +53,7 @@
 			i18nProvider.mode = ASYNC;
 		};
 
-		
+
 		/**
 		 * The main i18n service which handles retrieval of the translation map sends single translation terms to the backend.
 		 */
@@ -163,7 +163,7 @@
 				 * @returns {defer.promise|*|promise}
 				 */
 				this.ensureLocaleIsLoaded = function() {
-					return this._.promise;
+					return this._localeLoadedDeferred.promise;
 				};
 
 				/**
