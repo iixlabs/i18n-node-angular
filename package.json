@@ -1,12 +1,12 @@
 {
   "name": "@console/i18n-node-angular",
-  "version": "1.3.2",
+  "version": "2.0.0",
   "description": "express routes and angular service for integration with i18n-node",
   "main": "i18n-node-routes.js",
   "homepage": "https://github.com/oliversalzburg/i18n-node-angular",
   "author": "Oliver Salzburg",
   "license": "MIT",
-  "files":[
+  "files": [
     "dist",
     "i18n-node-angular.js",
     "i18n-node-routes.js"
@@ -20,8 +20,7 @@
     "i18n-node",
     "angular"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": ">= 0.4.4",
     "grunt-contrib-clean": "~0.5.0",
