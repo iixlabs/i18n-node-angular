@@ -1,5 +1,5 @@
 {
-  "name": "@iixlabs/i18n-node-angular",
+  "name": "@console/i18n-node-angular",
   "version": "1.3.2",
   "description": "express routes and angular service for integration with i18n-node",
   "main": "i18n-node-routes.js",
